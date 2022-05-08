@@ -9,6 +9,6 @@
   "author": "stevenic",
   "license": "MIT",
   "dependencies": {
-    "continue-js": "^0.1.0"
+    "@stevenic/continue-js": "^0.1.0"
   }
 }

@@ -1,4 +1,4 @@
-const { canContinueWith, continueWith, continueNow, dontContinue } = require('continue-js');
+const { canContinueWith, continueWith, continueNow, dontContinue } = require('@stevenic/continue-js');
 
 // Define test continuation
 async function testContinuation(context) {

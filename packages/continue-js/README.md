@@ -9,7 +9,7 @@ To learn more about what Continue JS is and how it works see [the project reposi
 Continue JS requires a recent version of [NodeJS](https://nodejs.org) and your package manager of choice. To add the latest version of Continue JS to your app using NPM, type the following from your apps root directory:
 
 ```bash
-$ npm install continue-js --save
+$ npm install @stevenic/continue-js --save
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ $ npm install continue-js --save
 Here's a simple JavaScript app to get started. This app calls a test continuation 5 times. To learn why that's useful see [the project repository](https://github.com/Stevenic/continue-js#what-is-it):
 
 ```javascript
-const { canContinueWith, continueWith, continueNow, dontContinue } = require('continue-js');
+const { canContinueWith, continueWith, continueNow, dontContinue } = require('@stevenic/continue-js');
 
 // Define test continuation
 async function testContinuation(context) {

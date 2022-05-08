@@ -26,7 +26,7 @@ As JavaScript/TypeScript developers you’re already using continuations in the 
 Continue JS solves the problem of identifying the next code to run, by letting you specify the function to continue with after an operation completes. There are 4 functions you need to learn to use Continue JS. Lets look at teh first 3 using a simple example of a bot that prompts a user for their name:
 
 ```TypeScript
-import { continueWith, dontContinue, canContinueWith } from "continue-js";
+import { continueWith, dontContinue, canContinueWith } from "@stevenic/continue-js";
 
 // Functions comprising the bots logic
 async function promptForNameContinuation(context: BotContext): Promise<Continuation> {
@@ -62,7 +62,7 @@ In our example, the bot will reply to the user with a personalized greeting. If 
 Let’s look at the bot’s driver code and our last function:
  
 ```TypeScript
-import { continueWith, continueNow } from "continue-js";
+import { continueWith, continueNow } from "@stevenic/continue-js";
 
 // Bots message handler
 async function onMessageReceived(context: BotContext) {
@@ -127,7 +127,7 @@ Each continuation function needs a unique ID. To help generate these ID’s, the
 To give added stability to the ID's that get generated for your continuation functions, you might consider registering a custom `getContinuationId()` function. Here’s an example that trims off the leading `__dirname` from each functions ID. Register this from your apps root source file and the ID’s generated for continuation functions will be relative ID’s, giving you some resilience to changes with to where your app gets deployed to:
 
 ```TypeScript
-import { configureContinue } from "continue-js";
+import { configureContinue } from "@stevenic/continue-js";
 
 configureContinue({
   getContinuationId: (fileName, functionName) => `${fileName.substring(__dirname.length)}#${functionName}`
@@ -139,7 +139,7 @@ configureContinue({
 Refactoring your apps code can result in new ID’s being generated for your apps continuation functions which can result in breaks to the existing continuations stored in your continuation store. To handle breaks like this you can register a custom `functionNotFound()` implementation that redirects to an error continuation:
 
 ```TypeScript
-import { continueWith, dontContinue, canContinueWith, configureContinue } from "continue-js";
+import { continueWith, dontContinue, canContinueWith, configureContinue } from "@stevenic/continue-js";
 
 // Define error continuation
 async function errorContinuation(context: BotContext): Promise<Continuation> {
@@ -161,7 +161,7 @@ configureContinue({
 Continue JS requires a recent version of [NodeJS](https://nodejs.org) and your package manager of choice. To add the latest version of Continue JS to your app using NPM, type the following from your apps root directory:
 
 ```bash
-$ npm install continue-js --save
+$ npm install @stevenic/continue-js --save
 ```
 
 ## Building

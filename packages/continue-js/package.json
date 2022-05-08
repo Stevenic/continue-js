@@ -1,5 +1,5 @@
 {
-  "name": "continue-js",
+  "name": "@stevenic/continue-js",
   "version": "0.1.0",
   "description": "A tiny library that makes building complex bots and workflows a little easier.",
   "keywords": [
