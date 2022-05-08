@@ -1,0 +1,24 @@
+{
+  "name": "build",
+  "version": "0.1.0",
+  "description": "Build package for Continue JS",
+  "main": "index.js",
+  "scripts": {
+    "install": "lerna bootstrap --hoist",
+    "build": "lerna run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Stevenic/continue-js.git"
+  },
+  "author": "stevenic",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Stevenic/continue-js/issues"
+  },
+  "homepage": "https://github.com/Stevenic/continue-js#readme",
+  "dependencies": {
+    "lerna": "^4.0.0"
+  }
+}
