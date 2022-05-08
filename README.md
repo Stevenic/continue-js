@@ -5,8 +5,8 @@ A tiny library that makes building complex bots and workflows a little easier.
 - [What is it?](#what-is-it)
 - [How does it work?](#how-does-it-work)
 - [Why is canContinueWith() needed?](#why-is-cancontinuewith-needed)
-- [Custom getContinuationId() implementations](#custom-getcontinuationid-implementations)
-- [Custom functionNotFound() implementations](#custom-functionnotfound-implementations)
+- [Custom getContinuationId()](#custom-getcontinuationid)
+- [Custom functionNotFound()](#custom-functionnotfound)
 
 ## What is it?
 Building a complex bot that can ask users branching questions or workflows that need to span many server processes and tasks can be challenging. You often need the help of [orchestration frameworks](https://en.wikipedia.org/wiki/Orchestration_(computing))
@@ -115,7 +115,7 @@ Each continuation function needs a unique ID. To help generate these ID’s, the
 2. The ID that's generated includes the full path of the functions js file, including drive letter. This is probably on in most deployments but you might want to consider registering a custom getContinuationId() function for added safety.
 3. You can do some amount of code refactoring without breaking existing continuations saved to your continuation store. Renaming continuation functions, moving them to a different file, or moving the source file to a different directory are all things that will break your stored continuations. You can either prevent breaks by providing a custom getContinuationId() function that generates a more stable ID or handle breaks by providing a custom `functionNotFound()` implementation.
 
-## Custom getContinuationId() implementations
+## Custom getContinuationId()
 To give added stability to the ID's that get generated for your continuation functions, you might consider registering a custom `getContinuationId()` function. Here’s an example that trims off the leading `__dirname` from each functions ID. Register this from your apps root source file and the ID’s generated for continuation functions will be relative ID’s, giving you some resilience to changes with to where your app gets deployed to:
 
 ```TS
@@ -126,7 +126,7 @@ configureContinue({
 });
 ```
 
-## Custom functionNotFound() implementations
+## Custom functionNotFound()
 Refactoring your apps code can result in new ID’s being generated for your apps continuation functions which can result in breaks to the existing continuations stored in your continuation store. To handle breaks like this you can register a custom `functionNotFound()` implementation that redirects to an error continuation:
 
 ```TS
