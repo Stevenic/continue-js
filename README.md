@@ -1,6 +1,13 @@
 # Continue JS
 A tiny library that makes building complex bots and workflows a little easier. 
 
+**Table of Contents**
+- [What is it?](#what-is-it)
+- [How does it work?](#how-does-it-work)
+- [Why is canContinueWith() needed?](#why-is-cancontinuewith-needed)
+- [Custom getContinuationId() implementations](#custom-getcontinuationid-implementations)
+- [Custom functionNotFound() implementations](#custom-functionnotfound-implementations)
+
 ## What is it?
 Building a complex bot that can ask users branching questions or workflows that need to span many server processes and tasks can be challenging. You often need the help of [orchestration frameworks](https://en.wikipedia.org/wiki/Orchestration_(computing))
 like the [Bot Framework SDK](https://github.com/microsoft/botframework-sdk) or the [Durable Task Framework](https://github.com/Azure/durabletask) to help simplify developing these types of applications. These domain specific frameworks are great (I helped design one of them) but let’s be honest, they often come with a steep learning curve. There are typically several concepts you need to learn to get started and the domain specific nature means that learning to use a framework for one domain will have little to no crossover for building apps in another domain.
@@ -13,6 +20,8 @@ As JavaScript/TypeScript developers you’re already using continuations in the 
 Continue JS solves the problem of identifying the next code to run, by letting you specify the function to continue with after an operation completes. There are 4 functions you need to learn to use Continue JS. Lets look at teh first 3 using a simple example of a bot that prompts a user for their name:
 
 ```TS
+import { continueWith, dontContinue, canContinueWith } from "continue-js";
+
 // Functions comprising the bots logic
 async function promptForNameContinuation(context: BotContext): Promise<Continuation> {
   await context.send(`Hi I'm "Bot". What's your name?`);
@@ -47,6 +56,8 @@ In our example, the bot will reply to the user with a personalized greeting. If 
 Let’s look at the bot’s driver code and our last function:
  
 ```TS
+import { continueWith, continueNow } from "continue-js";
+
 // Bots message handler
 async function onMessageReceived(context: BotContext) {
   // Load existing continuation for conversation or create a new one
@@ -85,3 +96,53 @@ The heart of our bots driver code is the `onMessageReceived()` function. To disp
 
 Deleting the existing continuation will effectively end the conversation meaning that the next turn with the user will result in the conversation flow returning to the initial continuation. 
 
+## Why is canContinueWith() needed?
+The main superpower of Continue JS is its ability to call functions anywhere in your app from a central dispatcher. For that to work it needs to know where all of the functions it might call are in your code and it needs to associate a unique ID with each function so that it knows which function to call, when a continuation is being executed using `continueNow()`.  In other programming languages we can use language features like attributes and reflection to find these functions. For JavaScript we need to maintain a central lookup table of the functions that can be continued and the `canContinueWith()` function is just a simple way of registering all of the possible continuation points in the app.
+
+If we look at the data that gets serialized for a continuation, we can see that it contains the ID of the function to continue and an optional set of additional arguments to pass that function:
+
+```TS
+export interface Continuation {
+    done: boolean;
+    continuationId?: string;
+    args?: any[];
+}
+```
+
+Each continuation function needs a unique ID. To help generate these ID’s, the canContinueWith() function generates a stack trace it walks in reverse to find the name of the file that called it. It then calls a configurable `getContinuationId()` function with the name of the calling file and the function name that was passed in. The default implementation of getContinuationId() combines these values into a unique ID using `${fileName}#${functionName}`. This ID is then used to register the function with a central lookup table and its added to the function itself as additional metadata so that continueWith() can easily validate that it was passed a registered function and knows the ID of the function to generate a continuation for. Knowing this results in a couple of observations: 
+
+1. You should always call canContinueWith() from the same file that the function was defined in. Otherwise, you risk ID clashes.
+2. The ID that's generated includes the full path of the functions js file, including drive letter. This is probably on in most deployments but you might want to consider registering a custom getContinuationId() function for added safety.
+3. You can do some amount of code refactoring without breaking existing continuations saved to your continuation store. Renaming continuation functions, moving them to a different file, or moving the source file to a different directory are all things that will break your stored continuations. You can either prevent breaks by providing a custom getContinuationId() function that generates a more stable ID or handle breaks by providing a custom `functionNotFound()` implementation.
+
+## Custom getContinuationId() implementations
+To give added stability to the ID's that get generated for your continuation functions, you might consider registering a custom `getContinuationId()` function. Here’s an example that trims off the leading `__dirname` from each functions ID. Register this from your apps root source file and the ID’s generated for continuation functions will be relative ID’s, giving you some resilience to changes with to where your app gets deployed to:
+
+```TS
+import { configureContinue } from "continue-js";
+
+configureContinue({
+  getContinuationId: (fileName, functionName) => `${fileName.substring(__dirname.length)}#${functionName}`
+});
+```
+
+## Custom functionNotFound() implementations
+Refactoring your apps code can result in new ID’s being generated for your apps continuation functions which can result in breaks to the existing continuations stored in your continuation store. To handle breaks like this you can register a custom `functionNotFound()` implementation that redirects to an error continuation:
+
+```TS
+import { continueWith, dontContinue, canContinueWith, configureContinue } from "continue-js";
+
+// Define error continuation
+async function errorContinuation(context: BotContext): Promise<Continuation> {
+  await context.send(`I'm sorry. Something went wrong.`);
+  return await dontContinue();
+}
+
+// Register it
+canContinueWith(errorContinuation);
+
+// Configure redirect
+configureContinue({
+  functionNotFound: (continuation, context) => continueWith(errorContinuation)
+});
+```
