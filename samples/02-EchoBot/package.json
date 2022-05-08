@@ -1,0 +1,33 @@
+{
+    "name": "continue-js-echobot",
+    "version": "1.0.0",
+    "description": "Continue JS + Bot Builder v4 echo bot sample",
+    "author": "stevenic",
+    "license": "MIT",
+    "main": "index.js",
+    "scripts": {
+        "start": "node ./index.js",
+        "watch": "nodemon ./index.js",
+        "lint": "eslint .",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com"
+    },
+    "dependencies": {
+        "@stevenic/continue-js": "^0.1.0",
+        "botbuilder": "~4.16.0",
+        "dotenv": "^8.2.0",
+        "restify": "~8.6.0"
+    },
+    "devDependencies": {
+        "eslint": "^7.0.0",
+        "eslint-config-standard": "^14.1.1",
+        "eslint-plugin-import": "^2.20.2",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-plugin-promise": "^4.2.1",
+        "eslint-plugin-standard": "^4.0.1",
+        "nodemon": "~2.0.4"
+    }
+}

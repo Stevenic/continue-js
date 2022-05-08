@@ -59,7 +59,7 @@ export interface ContinuationFunction extends Function {
  * Registers a function as being a continuation point.
  * @param fn Function to register continuation support for.
  */
-export function canContinueWith(fn: (context: any, ...args: any[]) => Promise<Continuation>): void {
+export function canContinueWith(fn: (context: any, ...args: any[]) => Promise<Continuation>): (context: any, ...args: any[]) => Promise<Continuation> {
     var originalFunc = Error.prepareStackTrace;
     try {
         const cfn = fn as ContinuationFunction;
@@ -96,6 +96,8 @@ export function canContinueWith(fn: (context: any, ...args: any[]) => Promise<Co
     } finally {
         Error.prepareStackTrace = originalFunc; 
     }
+
+    return fn;
 }
 
 /**
