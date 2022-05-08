@@ -1,14 +1,19 @@
 # Continue JS
+
 A tiny library that makes building complex bots and workflows a little easier. 
 
 **Table of Contents**
+
 - [What is it?](#what-is-it)
 - [How does it work?](#how-does-it-work)
 - [Why is canContinueWith() needed?](#why-is-cancontinuewith-needed)
-- [Custom getContinuationId()](#custom-getcontinuationid)
-- [Custom functionNotFound()](#custom-functionnotfound)
+  - [Custom getContinuationId()](#custom-getcontinuationid)
+  - [Custom functionNotFound()](#custom-functionnotfound)
+- [Installing](#installing)
+- [Building](#building)
 
 ## What is it?
+
 Building a complex bot that can ask users branching questions or workflows that need to span many server processes and tasks can be challenging. You often need the help of [orchestration frameworks](https://en.wikipedia.org/wiki/Orchestration_(computing))
 like the [Bot Framework SDK](https://github.com/microsoft/botframework-sdk) or the [Durable Task Framework](https://github.com/Azure/durabletask) to help simplify developing these types of applications. These domain specific frameworks are great (I helped design one of them) but let’s be honest, they often come with a steep learning curve. There are typically several concepts you need to learn to get started and the domain specific nature means that learning to use a framework for one domain will have little to no crossover for building apps in another domain.
 
@@ -17,9 +22,10 @@ Before I describe what Continue JS is, let me state what it isn’t. It’s not 
 As JavaScript/TypeScript developers you’re already using continuations in the form of callbacks or async/await. These continuations call back into your code after you perform some short running operation, like a network request, completes. These continuations are super rich and can leverage things like closure scope to give you access to variables in the processes memory after the operation completes. The problem with using traditional continuations like this for long running operations is that the long running operation could take minutes, hours, days, or even weeks to complete. During that time, your servers process could have crashed, redeployed, or even the code modified meaning there’s no way to reliably continue the execution of a running process after a long operation completes.
 
 ## How does it work?
+
 Continue JS solves the problem of identifying the next code to run, by letting you specify the function to continue with after an operation completes. There are 4 functions you need to learn to use Continue JS. Lets look at teh first 3 using a simple example of a bot that prompts a user for their name:
 
-```TS
+```TypeScript
 import { continueWith, dontContinue, canContinueWith } from "continue-js";
 
 // Functions comprising the bots logic
@@ -55,7 +61,7 @@ In our example, the bot will reply to the user with a personalized greeting. If 
 
 Let’s look at the bot’s driver code and our last function:
  
-```TS
+```TypeScript
 import { continueWith, continueNow } from "continue-js";
 
 // Bots message handler
@@ -97,11 +103,12 @@ The heart of our bots driver code is the `onMessageReceived()` function. To disp
 Deleting the existing continuation will effectively end the conversation meaning that the next turn with the user will result in the conversation flow returning to the initial continuation. 
 
 ## Why is canContinueWith() needed?
+
 The main superpower of Continue JS is its ability to call functions anywhere in your app from a central dispatcher. For that to work it needs to know where all of the functions it might call are in your code and it needs to associate a unique ID with each function so that it knows which function to call, when a continuation is being executed using `continueNow()`.  In other programming languages we can use language features like attributes and reflection to find these functions. For JavaScript we need to maintain a central lookup table of the functions that can be continued and the `canContinueWith()` function is just a simple way of registering all of the possible continuation points in the app.
 
 If we look at the data that gets serialized for a continuation, we can see that it contains the ID of the function to continue and an optional set of additional arguments to pass that function:
 
-```TS
+```TypeScript
 export interface Continuation {
     done: boolean;
     continuationId?: string;
@@ -115,10 +122,11 @@ Each continuation function needs a unique ID. To help generate these ID’s, the
 2. The ID that's generated includes the full path of the functions js file, including drive letter. This is probably on in most deployments but you might want to consider registering a custom getContinuationId() function for added safety.
 3. You can do some amount of code refactoring without breaking existing continuations saved to your continuation store. Renaming continuation functions, moving them to a different file, or moving the source file to a different directory are all things that will break your stored continuations. You can either prevent breaks by providing a custom getContinuationId() function that generates a more stable ID or handle breaks by providing a custom `functionNotFound()` implementation.
 
-## Custom getContinuationId()
+### Custom getContinuationId()
+
 To give added stability to the ID's that get generated for your continuation functions, you might consider registering a custom `getContinuationId()` function. Here’s an example that trims off the leading `__dirname` from each functions ID. Register this from your apps root source file and the ID’s generated for continuation functions will be relative ID’s, giving you some resilience to changes with to where your app gets deployed to:
 
-```TS
+```TypeScript
 import { configureContinue } from "continue-js";
 
 configureContinue({
@@ -126,10 +134,11 @@ configureContinue({
 });
 ```
 
-## Custom functionNotFound()
+### Custom functionNotFound()
+
 Refactoring your apps code can result in new ID’s being generated for your apps continuation functions which can result in breaks to the existing continuations stored in your continuation store. To handle breaks like this you can register a custom `functionNotFound()` implementation that redirects to an error continuation:
 
-```TS
+```TypeScript
 import { continueWith, dontContinue, canContinueWith, configureContinue } from "continue-js";
 
 // Define error continuation
@@ -146,3 +155,22 @@ configureContinue({
   functionNotFound: (continuation, context) => continueWith(errorContinuation)
 });
 ```
+
+## Installing
+
+Continue JS requires a recent version of [NodeJS](https://nodejs.org) and your package manager of choice. To add the latest version of Continue JS to your app using NPM, type the following from your apps root directory:
+
+```bash
+$ npm install continue-js --save
+```
+
+## Building
+
+To build Continue JS and its samples [fork the project](https://github.com/Stevenic/continue-js/fork) and clone it to your desktop using [git](https://git-scm.com/). Then install and build the packages using your package manager of choice.  Using NPM:
+
+```bash
+$ cd continue-js
+$ npm install
+$ npm run build
+```
+
