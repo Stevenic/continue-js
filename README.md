@@ -23,7 +23,7 @@ As JavaScript/TypeScript developers you’re already using continuations in the 
 
 ## How does it work?
 
-Continue JS solves the problem of identifying the next code to run, by letting you specify the function to continue with after an operation completes. There are 4 functions you need to learn to use Continue JS. Lets look at teh first 3 using a simple example of a bot that prompts a user for their name:
+Continue JS solves the problem of identifying the next code to run, by letting you specify the function to continue with after an operation completes. There are 4 functions you need to learn to use Continue JS. Lets look at the first 3 using a simple example of a bot that prompts a user for their name:
 
 ```TypeScript
 import { continueWith, dontContinue, canContinueWith } from "@stevenic/continue-js";
